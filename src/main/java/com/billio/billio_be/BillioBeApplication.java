@@ -8,7 +8,6 @@ public class BillioBeApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BillioBeApplication.class, args);
-		System.out.println("Billio BE up and running");
 	}
 
 }
