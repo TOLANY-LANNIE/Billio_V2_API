@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -35,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable String id) {
+    public ResponseEntity<?> getUserById(@PathVariable UUID id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -59,7 +60,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody User userDetails) {
+    public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
         try {
             return userService.updateUser(id, userDetails)
                     .map(ResponseEntity::ok)
@@ -70,14 +71,14 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+    public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
         return userService.deleteUser(id)
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<?> deactivateUser(@PathVariable String id) {
+    public ResponseEntity<?> deactivateUser(@PathVariable UUID id) {
         return userService.deactivateUser(id)
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();

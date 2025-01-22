@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -32,7 +33,7 @@ public class UserService {
         return userRepository.findByRole(role);
     }
 
-    public Optional<User> getUserById(String id) {
+    public Optional<User> getUserById(UUID id) {
         return userRepository.findById(id);
     }
 
@@ -47,7 +48,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(String id, User userDetails) {
+    public Optional<User> updateUser(UUID id, User userDetails) {
         return userRepository.findById(id)
                 .map(existingUser -> {
                     if (userDetails.getEmail() != null &&
@@ -78,7 +79,7 @@ public class UserService {
                 });
     }
 
-    public boolean deleteUser(String id) {
+    public boolean deleteUser(UUID id) {
         return userRepository.findById(id)
                 .map(user -> {
                     userRepository.delete(user);
@@ -87,7 +88,7 @@ public class UserService {
                 .orElse(false);
     }
 
-    public boolean deactivateUser(String id) {
+    public boolean deactivateUser(UUID id) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setIsActive(false);
