@@ -5,65 +5,81 @@ import com.billio.billio_be.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<User>> getActiveUsers() {
+        return ResponseEntity.ok(userService.getActiveUsers());
+    }
+
+    @GetMapping("/role/{role}")
+    public ResponseEntity<List<User>> getUsersByRole(@PathVariable User.Role role) {
+        return ResponseEntity.ok(userService.getUsersByRole(role));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable String id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        return userService.getUserByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
-            return ResponseEntity.ok(userService.createUser(user));
+            User createdUser = userService.createUser(user);
+            return ResponseEntity.ok(createdUser);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody User userDetails) {
         try {
-            return ResponseEntity.ok(userService.updateUser(id, user));
+            return userService.updateUser(id, userDetails)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        try {
-            userService.deleteUser(id);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+        return userService.deleteUser(id)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{id}/password")
-    public ResponseEntity<User> updatePassword(@PathVariable Long id, @RequestBody String newPasswordHash) {
-        try {
-            return ResponseEntity.ok(userService.updatePassword(id, newPasswordHash));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam String query) {
-        return ResponseEntity.ok(userService.searchUsers(query));
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<?> deactivateUser(@PathVariable String id) {
+        return userService.deactivateUser(id)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 }
