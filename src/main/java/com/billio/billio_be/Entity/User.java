@@ -23,8 +23,8 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "role")
+    private String role;
 
     @Column(name = "is_active")
     private Boolean isActive = true;
@@ -34,11 +34,6 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public enum Role {
-        USER,
-        ADMIN
-    }
 
     @PrePersist
     protected void onCreate() {
@@ -67,8 +62,8 @@ public class User {
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
     public Boolean getIsActive() { return isActive; }
     public void setIsActive(Boolean active) { isActive = active; }

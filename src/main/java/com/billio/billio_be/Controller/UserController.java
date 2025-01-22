@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -20,67 +21,73 @@ public class UserController {
         this.userService = userService;
     }
 
+    // Get all users
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    // Get active users
     @GetMapping("/active")
     public ResponseEntity<List<User>> getActiveUsers() {
         return ResponseEntity.ok(userService.getActiveUsers());
     }
 
+    // Get users by role
     @GetMapping("/role/{role}")
-    public ResponseEntity<List<User>> getUsersByRole(@PathVariable User.Role role) {
+    public ResponseEntity<List<User>> getUsersByRole(@PathVariable String role) {
         return ResponseEntity.ok(userService.getUsersByRole(role));
     }
 
+    // Get user by ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable UUID id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Optional<User>> getUserById(@PathVariable UUID id) {
+        return ResponseEntity.of(Optional.ofNullable(userService.getUserById(id)));
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
-        return userService.getUserByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    // Get user by email
+    @GetMapping("/email")
+    public ResponseEntity<Optional<User>> getUserByEmail(@RequestParam String email) {
+        return ResponseEntity.of(Optional.ofNullable(userService.getUserByEmail(email)));
     }
 
+    // Create a new user
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) {
         try {
-            User createdUser = userService.createUser(user);
-            return ResponseEntity.ok(createdUser);
+            return ResponseEntity.ok(userService.createUser(user));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
+    // Update an existing user
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
+    public ResponseEntity<Optional<User>> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
         try {
-            return userService.updateUser(id, userDetails)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+            return ResponseEntity.ok(userService.updateUser(id, userDetails));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
+    // Delete a user
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
-        return userService.deleteUser(id)
-                ? ResponseEntity.ok().build()
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+        if (userService.deleteUser(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    // Deactivate a user
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<?> deactivateUser(@PathVariable UUID id) {
-        return userService.deactivateUser(id)
-                ? ResponseEntity.ok().build()
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deactivateUser(@PathVariable UUID id) {
+        if (userService.deactivateUser(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

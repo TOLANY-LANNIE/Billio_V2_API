@@ -29,7 +29,7 @@ public class UserService {
         return userRepository.findByIsActiveTrue();
     }
 
-    public List<User> getUsersByRole(User.Role role) {
+    public List<User> getUsersByRole(String role) {
         return userRepository.findByRole(role);
     }
 
