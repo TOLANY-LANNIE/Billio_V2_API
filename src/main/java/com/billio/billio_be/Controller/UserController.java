@@ -27,7 +27,7 @@ public class UserController {
             User registeredUser = userService.register(user);
             return ResponseEntity.ok(convertToDTO(registeredUser));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null); // Replace with proper error handling
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
