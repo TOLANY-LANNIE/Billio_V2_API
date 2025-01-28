@@ -23,11 +23,20 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private String role;
 
     @Column(name = "is_active")
     private Boolean isActive = true;
+
+    @Column(name = "failed_login_attempts")
+    private Integer failedLoginAttempts = 0;
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+
+    @Column(name = "token_expiration")
+    private LocalDateTime tokenExpiration;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -47,27 +56,91 @@ public class User {
     }
 
     // Getters and Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getFirstName() { return firstName; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean active) { isActive = active; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public Integer getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public void setFailedLoginAttempts(Integer failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    public LocalDateTime getTokenExpiration() {
+        return tokenExpiration;
+    }
+
+    public void setTokenExpiration(LocalDateTime tokenExpiration) {
+        this.tokenExpiration = tokenExpiration;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

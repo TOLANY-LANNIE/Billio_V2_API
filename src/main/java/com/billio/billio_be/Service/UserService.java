@@ -3,6 +3,7 @@ package com.billio.billio_be.Service;
 import com.billio.billio_be.Entity.User;
 import com.billio.billio_be.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,13 +40,6 @@ public class UserService {
 
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
-    }
-
-    public User createUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
-        return userRepository.save(user);
     }
 
     public Optional<User> updateUser(UUID id, User userDetails) {
@@ -97,4 +91,13 @@ public class UserService {
                 })
                 .orElse(false);
     }
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public User createUser(User user) {
+        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash())); // Encrypt password
+        return userRepository.save(user);
+    }
+
 }
