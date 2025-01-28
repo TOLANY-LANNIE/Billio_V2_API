@@ -1,100 +1,93 @@
 package com.billio.billio_be.Service;
 
+import com.billio.billio_be.DTO.UserDTO;
 import com.billio.billio_be.Entity.User;
 import com.billio.billio_be.Repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
 
-    @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public List<User> getActiveUsers() {
-        return userRepository.findByIsActiveTrue();
-    }
-
-    public List<User> getUsersByRole(User.Role role) {
-        return userRepository.findByRole(role);
-    }
-
-    public Optional<User> getUserById(UUID id) {
-        return userRepository.findById(id);
-    }
-
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public User createUser(User user) {
+    // Create a new user with password encryption
+    // Register a new user
+    public User register(User user) {
+        // Check if the email already exists
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
+
+        // Encrypt the password
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        user.setPasswordHash(encoder.encode(user.getPasswordHash()));
+
+        user.setIsActive(true); // Set user as active
+
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(UUID id, User userDetails) {
-        return userRepository.findById(id)
-                .map(existingUser -> {
-                    if (userDetails.getEmail() != null &&
-                            !userDetails.getEmail().equals(existingUser.getEmail()) &&
-                            userRepository.existsByEmail(userDetails.getEmail())) {
-                        throw new RuntimeException("Email already exists");
-                    }
-
-                    if (userDetails.getEmail() != null) {
-                        existingUser.setEmail(userDetails.getEmail());
-                    }
-                    if (userDetails.getPasswordHash() != null) {
-                        existingUser.setPasswordHash(userDetails.getPasswordHash());
-                    }
-                    if (userDetails.getFirstName() != null) {
-                        existingUser.setFirstName(userDetails.getFirstName());
-                    }
-                    if (userDetails.getLastName() != null) {
-                        existingUser.setLastName(userDetails.getLastName());
-                    }
-                    if (userDetails.getRole() != null) {
-                        existingUser.setRole(userDetails.getRole());
-                    }
-                    if (userDetails.getIsActive() != null) {
-                        existingUser.setIsActive(userDetails.getIsActive());
-                    }
-                    return userRepository.save(existingUser);
-                });
+    // Get all users and convert them to DTOs
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public boolean deleteUser(UUID id) {
+    // Get a user by ID and convert to DTO
+    public Optional<UserDTO> getUserById(UUID id) {
         return userRepository.findById(id)
-                .map(user -> {
-                    userRepository.delete(user);
-                    return true;
-                })
-                .orElse(false);
+                .map(this::convertToDTO);
     }
 
-    public boolean deactivateUser(UUID id) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setIsActive(false);
-                    userRepository.save(user);
-                    return true;
-                })
-                .orElse(false);
+    // Save a new user (used for scenarios where password encryption is not needed)
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    // Update user (returns updated DTO)
+    public Optional<UserDTO> updateUser(UUID id, User updatedUser) {
+        return userRepository.findById(id).map(existingUser -> {
+            // Update fields
+            existingUser.setEmail(updatedUser.getEmail());
+            existingUser.setFirstName(updatedUser.getFirstName());
+            existingUser.setLastName(updatedUser.getLastName());
+            existingUser.setRole(updatedUser.getRole());
+            existingUser.setIsActive(updatedUser.getIsActive());
+
+            // Save updated user (updatedAt is handled by @PreUpdate in the entity)
+            User savedUser = userRepository.save(existingUser);
+            return convertToDTO(savedUser);
+        });
+    }
+
+    // Delete a user
+    public void deleteUser(UUID id) {
+        userRepository.deleteById(id);
+    }
+
+    // Convert User entity to UserDTO
+    private UserDTO convertToDTO(User user) {
+        return new UserDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getIsActive(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
     }
 }
